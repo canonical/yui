@@ -82,3 +82,45 @@ npm run stage-npm && cd npm-dist \
 ```
 
 All three must appear with **no** `build/` prefix.
+
+## Releasing
+
+Releases are **driven by GitHub Releases**, which trigger `publish.yml`
+(`on: release: published`) to publish to npm via OIDC trusted publishing. Do
+**not** run `npm publish` manually first — if the version is already on the
+registry, the release-triggered run fails with
+`cannot publish over the previously published versions`.
+
+Flow for cutting a release:
+
+1. Bump the version and commit it:
+   ```sh
+   npm version <new-version> --no-git-tag-version   # e.g. 3.18.3
+   git commit -am "chore: release v<new-version>"
+   git push canonical main
+   ```
+   (Use a prerelease version like `3.18.3-rc.0` to test the pipeline without
+   burning a stable number.)
+2. Sanity-check the staged tarball locally (see the contract check above).
+3. Create the GitHub Release (this also creates the tag and fires the publish
+   workflow):
+   ```sh
+   gh release create v<new-version> -R canonical/yui \
+     --title "v<new-version>" --notes-file <notes>.md --latest
+   ```
+   For a prerelease, add `--prerelease` instead of `--latest`.
+4. Watch the publish run; it stages `npm-dist/` and publishes via OIDC (no
+   `NPM_TOKEN`):
+   ```sh
+   gh run watch "$(gh run list -R canonical/yui --workflow=publish.yml --limit 1 --json databaseId --jq '.[0].databaseId')" -R canonical/yui --exit-status
+   ```
+
+Notes:
+
+- The npm **Trusted Publisher** must be configured once on npmjs.com for
+  `@canonical/yui` → repo `canonical/yui`, workflow `publish.yml` (no
+  environment). Without it the publish step fails with a 404.
+- A prerelease version (e.g. `-rc.0`) cannot use the `latest` dist-tag; if you
+  publish one outside the release flow, pass `--tag next`.
+- npm never lets you reuse or fully unpublish a version number, so treat each
+  published version as permanent.
