@@ -1,35 +1,66 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18, 20, 26]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
-      - name: Run tests
-        run: npm test
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node-version: [18, 20, 26]
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - name: Install dependencies
+              run: npm install --no-audit --no-fund
+            - name: Run unit/node tests
+              run: npm test
 
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 26
-      - run: npm install --no-fund
-      - name: Audit production dependencies
-        run: npm audit --omit=dev || true
+    browser:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 26
+            - run: npm install --no-audit --no-fund
+            - name: Install Playwright Chromium
+              run: npx playwright install --with-deps chromium
+            - name: Run browser tests
+              run: npm run test:browser
+            - name: Run legacy YUITest harnesses
+              run: npm run test:legacy
+
+    audit:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 26
+            - run: npm install --no-fund
+            - name: Audit production dependencies
+              run: npm audit --omit=dev || true
+
+    freeze:
+        # Legacy upstream YUITest harnesses are frozen reference. Fail PRs that
+        # touch them so the originals stay unmodified (see AGENTS.md).
+        if: github.event_name == 'pull_request'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+            - name: Reject changes under src/**/tests
+              run: |
+                  changed=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'src/**/tests/**')
+                  if [ -n "$changed" ]; then
+                    echo "Legacy harnesses are frozen; reverting required:"; echo "$changed"; exit 1
+                  fi
