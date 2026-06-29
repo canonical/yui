@@ -3,3 +3,11 @@ src
 sandbox
 !build
 *-coverage.js
+
+# Modern dev/test tooling — not part of the published package
+tests
+test-results
+playwright.config.js
+playwright-report
+vitest.config.js
+.github
