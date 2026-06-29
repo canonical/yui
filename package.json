@@ -1,9 +1,9 @@
 {
-    "name": "yui",
+    "name": "@canonical/yui",
     "version": "3.18.2-pre",
-    "description": "YUI 3 Source",
+    "description": "YUI 3 Source (Canonical security-maintained fork)",
     "author": "Dav Glass <davglass@gmail.com>",
-    "bugs": { "url" : "https://github.com/yui/yui3/issues" },
+    "bugs": { "url" : "https://github.com/canonical/yui/issues" },
     "engines": {
         "node" : ">=0.8.0"
     },
@@ -36,8 +36,11 @@
             "url" : "http://yuilibrary.com/license/"
         }
     ],
+    "publishConfig": {
+        "access": "public"
+    },
     "repository": {
         "type":"git",
-        "url":"http://github.com/yui/yui3.git"
+        "url":"https://github.com/canonical/yui.git"
     }
 }

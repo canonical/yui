@@ -1,3 +1,7 @@
+## Canonical fork
+
+Maintained as `@canonical/yui` for security support after upstream archival (Aug 2014).
+
 YUI's change history is available in two formats:
 
 * Per-Release on the Wiki:

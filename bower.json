@@ -1,5 +1,5 @@
 {
-  "name": "yui",
+  "name": "@canonical/yui",
   "version": "3.18.2-pre",
   "main": "build/yui/yui.js",
   "devDependencies": {
