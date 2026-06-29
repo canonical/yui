@@ -21,12 +21,13 @@ jobs:
               with:
                   node-version: 26
                   registry-url: https://registry.npmjs.org
+                  # Disable dependency caching in this privileged (id-token: write)
+                  # publish job to avoid cache-poisoning of the published artifact.
+                  package-manager-cache: false
             - name: Install dependencies
               run: npm ci --no-audit --no-fund
             - name: Run unit/node tests
               run: npm test
-            - name: Ensure npm supports trusted publishing
-              run: npm install -g npm@latest
             - name: Stage flattened package (build output at root)
               run: npm run stage-npm
             - name: Publish to npm (OIDC trusted publishing)
