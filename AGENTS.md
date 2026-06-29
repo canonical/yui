@@ -20,6 +20,23 @@ not new features or general bug fixes.
 - Active modernization: replacing the deprecated `request` dependency and migrating
   tests to Vitest/Playwright.
 
+## Tests
+
+Two layers, both run in CI:
+
+- New tests (`tests/`): Vitest (`tests/node`) + Playwright (`tests/browser`,
+  `tests/legacy`). This is where new/changed coverage goes.
+- Legacy upstream suite (`src/<mod>/tests/**`): the original YUITest harnesses.
+
+### Legacy suite is FROZEN — do not modify
+
+The `src/**/tests/**` harnesses are preserved upstream reference and must stay
+**unchanged**. Do not edit, port, reformat, or delete them. They run unmodified
+via `tests/legacy` (Playwright loads each `.html` through `build/yui` and reads
+the test-console verdict). A curated, fast subset is enforced in CI; extend it by
+adding a path to `HARNESSES`, never by touching the harness. If a security fix
+requires new coverage, add it under `tests/` — leave the originals alone.
+
 ## Commit message standard
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
