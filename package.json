@@ -23,7 +23,9 @@
         "test:node": "vitest run",
         "test:browser": "playwright test --project=browser",
         "test:legacy": "playwright test --project=legacy",
-        "test:all": "vitest run && playwright test"
+        "test:all": "vitest run && playwright test",
+        "stage-npm": "node scripts/stage-npm.js",
+        "publish-npm": "npm run stage-npm && npm publish ./npm-dist"
     },
     "license": "BSD-3-Clause",
     "publishConfig": {

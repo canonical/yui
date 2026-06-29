@@ -52,3 +52,35 @@ Tests run on Vitest (unit/node) and Playwright (browser):
 
 GitHub Actions (`.github/workflows/ci.yml`) installs deps and runs tests on
 Node 18, 20, and 26 LTS, plus a production-dependency `npm audit`.
+
+## Publishing (flattened npm layout)
+
+The published package must mirror the historical `yui` npm package: every module
+sits at the **tarball root** (e.g. `yui/yui-min.js`, `loader/loader-min.js`,
+`cssreset/cssreset.css`) with **no `build/` prefix**. Downstream consumers such as
+Launchpad symlink `node_modules/yui` and serve files by these root-relative paths
+via their combo loader (`yui/<module>/<module>-min.js`) and `combo.scss`
+(`cssreset/cssreset.css`, `<module>/assets/skins/sam/*.css`).
+
+`build/` is **not** moved in the repo (it stays under `build/` so the layout is
+obvious and diffable). Instead `npm run stage-npm` copies the committed `build/`
+output into a `npm-dist/` staging dir whose root *is* the build output, and the
+package is published from there:
+
+- `npm run stage-npm` — stage `npm-dist/` from `build/`. Strips `*-coverage.js`
+  and any `*.swf` (Flash; Launchpad deletes these, keep it a no-op), writes a
+  flattened `index.js` (`require("./yui-nodejs/yui-nodejs.js")` → `{ YUI }`) and a
+  trimmed `package.json` (`main: index.js`, no scripts/devDependencies).
+- `npm run publish-npm` — `stage-npm` then `npm publish ./npm-dist`.
+
+CI publishes the same way: `.github/workflows/publish.yml` runs `stage-npm` and
+`npm publish ./npm-dist` via npm OIDC trusted publishing (no `NPM_TOKEN`).
+
+Verify the contract before tagging:
+
+```sh
+npm run stage-npm && cd npm-dist \
+  && npm pack --dry-run | grep -E 'yui/yui-min.js|loader/loader-min.js|cssreset/cssreset.css'
+```
+
+All three must appear with **no** `build/` prefix.

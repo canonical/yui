@@ -1,4 +1,5 @@
 build-npm/
+npm-dist/
 release/
 bower_components/
 build_docs/
