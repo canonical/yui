@@ -1,12 +1,12 @@
 /**
- * Regression test pinning the CURRENT (request-based) behavior of
- * yql-nodejs `_send`, which has no upstream coverage. This locks the contract
- * before Phase 3 swaps the transport to native fetch:
+ * Regression test pinning the behavior of yql-nodejs `_send`, which has no
+ * upstream coverage. Phase 3 swapped the transport from `request` to native
+ * `fetch`; the contract is unchanged:
  *   - GET with timeout = o.timeout || 30000.
- *   - success: o.on.success(JSON.parse(res.body)).
+ *   - success: o.on.success(JSON.parse(<response body>)).
  *   - error:   o.on.success({ error: err }).
  */
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -14,24 +14,29 @@ import { dirname, join } from "node:path";
 const require = createRequire(import.meta.url);
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-// Replace the deprecated `request` module in the cache so we capture transport
-// options and drive the callback deterministically (no network).
+// Capture transport options and drive responses deterministically (no network).
 const calls = [];
-const reqId = require.resolve("request");
-require.cache[reqId] = {
-    id: reqId,
-    exports: (url, opts, cb) => calls.push({ url, opts, cb }),
-    loaded: true
-};
+const realFetch = globalThis.fetch;
+const realTimeout = AbortSignal.timeout;
+
+beforeEach(() => {
+    calls.length = 0;
+    AbortSignal.timeout = (ms) => ({ timeout: ms });
+    globalThis.fetch = (url, opts) =>
+        new Promise((resolve, reject) => {
+            calls.push({ url, opts, resolve, reject });
+        });
+});
+
+afterEach(() => {
+    globalThis.fetch = realFetch;
+    AbortSignal.timeout = realTimeout;
+});
 
 const { YUI } = require(join(root, "build/yui-nodejs/yui-nodejs.js"));
 const withYql = () => new Promise((res) => YUI().use("yql", res));
 
-describe("yql-nodejs _send (current request transport)", () => {
-    beforeEach(() => {
-        calls.length = 0;
-    });
-
+describe("yql-nodejs _send (native fetch transport)", () => {
     it("issues a GET with default 30s timeout", async () => {
         const Y = await withYql();
         Y.YQLRequest.prototype._send("https://example/yql", {
@@ -40,7 +45,7 @@ describe("yql-nodejs _send (current request transport)", () => {
         expect(calls).toHaveLength(1);
         expect(calls[0].url).toBe("https://example/yql");
         expect(calls[0].opts.method).toBe("GET");
-        expect(calls[0].opts.timeout).toBe(30000);
+        expect(calls[0].opts.signal.timeout).toBe(30000);
     });
 
     it("honours an explicit timeout", async () => {
@@ -49,7 +54,7 @@ describe("yql-nodejs _send (current request transport)", () => {
             timeout: 5000,
             on: { success() {} }
         });
-        expect(calls[0].opts.timeout).toBe(5000);
+        expect(calls[0].opts.signal.timeout).toBe(5000);
     });
 
     it("parses body and calls success on a good response", async () => {
@@ -58,7 +63,10 @@ describe("yql-nodejs _send (current request transport)", () => {
         Y.YQLRequest.prototype._send("https://example/yql", {
             on: { success }
         });
-        calls[0].cb(null, { body: '{"query":{"count":1}}' });
+        calls[0].resolve({
+            text: () => Promise.resolve('{"query":{"count":1}}')
+        });
+        await vi.waitFor(() => expect(success).toHaveBeenCalled());
         expect(success).toHaveBeenCalledWith({ query: { count: 1 } });
     });
 
@@ -69,7 +77,8 @@ describe("yql-nodejs _send (current request transport)", () => {
         Y.YQLRequest.prototype._send("https://example/yql", {
             on: { success }
         });
-        calls[0].cb(err, null);
+        calls[0].reject(err);
+        await vi.waitFor(() => expect(success).toHaveBeenCalled());
         expect(success).toHaveBeenCalledWith({ error: err });
     });
 });

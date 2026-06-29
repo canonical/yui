@@ -13,13 +13,27 @@ together. No build step runs on `npm install`.
 
 The legacy `Gruntfile.js` is retained for historical reference only.
 
+## Native networking (no `request` dependency)
+
+The deprecated `request` module (which transitively pulled vulnerable
+`form-data`, advisory 1109540) has been removed entirely. All Node transports
+now use native `fetch` + `AbortSignal.timeout`, so the package ships with **zero**
+runtime dependencies. Affected modules — keep `src/` and `build/` in sync:
+
+- `yql-nodejs` — `Y.YQLRequest._send`.
+- `io-nodejs` — `Y.IO.request` is a fetch shim returning `(err, {statusCode,
+  headers, body})`, preserving the legacy transport surface.
+- `get-nodejs` (also bundled in `build/yui-nodejs/*`) — remote module loading.
+
+Requires a runtime with global `fetch`/`AbortSignal.timeout` (Node 18+).
+
 ## Testing
 
 Tests run on Vitest (unit/node) and Playwright (browser):
 
 - `npm test` / `npm run test:node` — Vitest, `tests/node/**`. Covers CommonJS
   consumption, browser combo asset integrity, `YUI().use()` bootstrap, and a
-  `yql-nodejs._send` transport regression.
+  `yql-nodejs._send` fetch-transport regression.
 - `npm run test:browser` — Playwright, `tests/browser/**`. Boots the committed
   minified seed in Chromium (mirrors Launchpad's combo loading). Requires
   `npx playwright install chromium` first.

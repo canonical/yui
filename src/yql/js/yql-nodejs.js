@@ -1,25 +1,26 @@
 /**
-* NodeJS plugin for YQL to use native request to make requests instead of JSONP.
-* Not required by the user, it's conditionally loaded and should "just work".
-* @module yql
-* @submodule yql-nodejs
-*/
+ * NodeJS plugin for YQL to use native fetch to make requests instead of JSONP.
+ * Not required by the user, it's conditionally loaded and should "just work".
+ * @module yql
+ * @submodule yql-nodejs
+ */
 
-var request = require('request');
-
-//Over writes Y.YQLRequest._send to use request instead of JSONP
+//Over writes Y.YQLRequest._send to use native fetch instead of JSONP
 Y.YQLRequest.prototype._send = function (url, o) {
-    request(url, {
-        method: 'GET',
-        timeout: o.timeout || (30 * 1000)
-    }, function(err, res) {
-        if (err) {
+    fetch(url, {
+        method: "GET",
+        signal: AbortSignal.timeout(o.timeout || 30 * 1000)
+    })
+        .then(function (res) {
+            return res.text();
+        })
+        .then(function (body) {
+            o.on.success(JSON.parse(body));
+        })
+        .catch(function (err) {
             //The signature that YQL requires
             o.on.success({
                 error: err
             });
-        } else {
-            o.on.success(JSON.parse(res.body));
-        }
-    });
+        });
 };
