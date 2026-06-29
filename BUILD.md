@@ -23,7 +23,7 @@ runtime dependencies. Affected modules — keep `src/` and `build/` in sync:
   headers, body})`, preserving the legacy transport surface.
 - `get-nodejs` (also bundled in `build/yui-nodejs/*`) — remote module loading.
 
-Requires a runtime with global `fetch`/`AbortSignal.timeout` (Node 18+).
+Requires a runtime with global `fetch`/`AbortSignal.timeout` (Node 20+).
 
 ## Testing
 
@@ -49,7 +49,7 @@ Tests run on Vitest (unit/node) and Playwright (browser):
 ## CI
 
 GitHub Actions (`.github/workflows/ci.yml`) installs deps and runs tests on
-Node 18, 20, and 26 LTS, plus a production-dependency `npm audit`.
+Node 20 and 26 LTS, plus a production-dependency `npm audit`.
 
 ## Publishing (flattened npm layout)
 
