@@ -32,6 +32,4 @@ jobs:
             - name: Publish to npm (OIDC trusted publishing)
               # Publishes the staged npm-dist whose root mirrors the legacy `yui`
               # layout (modules at the tarball root, no build/ prefix).
-              # Current version is a prerelease (3.18.2-pre), so it must go under a
-              # dist-tag. Drop "--tag next" once publishing a stable release.
-              run: npm publish ./npm-dist --tag next
+              run: npm publish ./npm-dist

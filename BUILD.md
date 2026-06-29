@@ -11,8 +11,6 @@ Built artifacts under `build/` are committed and must stay in sync with their
 `build/<module>/<module>.js`, `-debug.js`, and `-min.js` by hand and commit them
 together. No build step runs on `npm install`.
 
-The legacy `Gruntfile.js` is retained for historical reference only.
-
 ## Native networking (no `request` dependency)
 
 The deprecated `request` module (which transitively pulled vulnerable

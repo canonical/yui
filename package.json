@@ -1,6 +1,6 @@
 {
     "name": "@canonical/yui",
-    "version": "3.18.2-pre",
+    "version": "3.18.2",
     "description": "YUI 3 Source (Canonical security-maintained fork)",
     "author": "Dav Glass <davglass@gmail.com>",
     "bugs": {
