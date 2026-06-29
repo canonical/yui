@@ -3,44 +3,34 @@
     "version": "3.18.2-pre",
     "description": "YUI 3 Source (Canonical security-maintained fork)",
     "author": "Dav Glass <davglass@gmail.com>",
-    "bugs": { "url" : "https://github.com/canonical/yui/issues" },
+    "bugs": {
+        "url": "https://github.com/canonical/yui/issues"
+    },
     "engines": {
-        "node" : ">=0.8.0"
+        "node": ">=18"
     },
     "directories": {
-        "lib" : "."
+        "lib": "."
     },
     "main": "./index.js",
     "dependencies": {
         "request": "~2.40.0"
     },
     "devDependencies": {
-        "yogi": "~0.1.0",
-        "parserlib": "~0.2.2",
-        "grunt": "~0.4.1",
-        "grunt-cli": "~0.1.7",
-        "grunt-yui-contrib": "~0.0.20",
-        "grunt-lib-contrib": "~0.5.3",
-        "grunt-contrib-compress": "0.4.10",
-        "grunt-css-selectors": "~0.1.2",
-        "bower": "~1.2.8",
-        "archiver": "0.4.10"
+        "@playwright/test": "^1.61.1",
+        "vitest": "^2.1.9"
     },
     "scripts": {
-        "postinstall": "grunt build",
-        "test": "grunt test"
+        "test": "vitest run",
+        "test:node": "vitest run",
+        "test:browser": "playwright test"
     },
-    "licenses":[
-        {
-            "type" : "BSD",
-            "url" : "http://yuilibrary.com/license/"
-        }
-    ],
+    "license": "BSD-3-Clause",
     "publishConfig": {
         "access": "public"
     },
     "repository": {
-        "type":"git",
-        "url":"https://github.com/canonical/yui.git"
+        "type": "git",
+        "url": "https://github.com/canonical/yui.git"
     }
 }

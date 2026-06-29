@@ -1,57 +1,25 @@
-Grunt Building
-==============
+Building
+========
 
-Our dev and release builds are handled by [Grunt](http://gruntjs.com/).
+This is a security-maintained fork of YUI 3. The original `grunt`/`yogi`/`bower`
+toolchain targeted Node 0.10/0.11 and is dead; it is no longer installed or run.
 
-Installation
-------------
+## build/ is hand-synced
 
-First you need to install the `grunt-cli` (`npm -g install grunt-cli`)
+Built artifacts under `build/` are committed and must stay in sync with their
+`src/` counterparts. When you change a module's source, update the matching
+`build/<module>/<module>.js`, `-debug.js`, and `-min.js` by hand and commit them
+together. No build step runs on `npm install`.
 
-After cloning you can simply do an NPM install.
+The legacy `Gruntfile.js` is retained for historical reference only.
 
-`npm install`
+## Testing
 
-This will install the tools needed locally and build the library and npm package.
+Tests are being migrated to Vitest (unit/node) and Playwright (browser). Run:
 
-Shortcuts
----------
+`npm test`
 
- * `grunt build` Runs a `yogi` build.
- * `grunt npm` Runs the npm build.
- * `grunt test` Runs a `yogi test` on the entire lib.
- * `grunt test-cli` Runs only the CLI tests.
- * `grunt travis` Runs a custom build/test just for Travis CI.
- * `grunt release` Runs a release build (more below)
- * `grunt`, `grunt help`, `grunt yui` Will display build help.
+## CI
 
-Release Build
--------------
-
-You can do a full YUI release build with `grunt release`.
-
-This command uses two CLI options (`--release-version` and `--release-build`).
-
- * `--release-version` The version to stamp the files with
- * `--release-build` The build number of this release.
-
-If `--release-build` is not provided, the last Git sha (short version) will be used in it's place.
-
-Release builds are stored under: `./releases/[VERSION]/`
-
-The release build consists of the following artifacts:
-
- * `dist release zip` Containing source, tests, HISTORY, api docs and landing pages.
- * `cdn release zip` Contains the build dir stamped for a CDN release (CSS files processed for relative paths)
- * `ssl cdn release zip` Same as above only tweaked for SSL access.
- * `npm package` The npm package designed for a simple `npm publish`
-
-Other Builds
-------------
-
-We no longer require a `Makefile` for any of our modules, they have all been converted to `grunt` builds.
-
- * `cssnormalize` Under `src/cssnormalize`, `grunt` will import the source.
- * `handlebars` Under `src/handlebars`, `grunt` will import the source.
- * `test` Under `src/test`, `grunt` will import the source.
-
+GitHub Actions (`.github/workflows/ci.yml`) installs deps and runs tests on
+Node 18, 20, and 26 LTS, plus a production-dependency `npm audit`.

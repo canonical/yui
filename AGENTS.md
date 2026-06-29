@@ -13,10 +13,12 @@ not new features or general bug fixes.
 - Forked from upstream `yui/yui3` (archived Aug 2014).
 - Package renamed to `@canonical/yui`; default branch `main`.
 - Source lives in `src/`; built artifacts are committed in `build/` and must stay
-  in sync with their `src/` counterparts.
-- Target runtime: Node 26 LTS (engines `node >=18`).
-- Active modernization: replacing the deprecated `request` dependency, migrating
-  tests to Vitest/Playwright, and moving CI to GitHub Actions.
+  in sync with their `src/` counterparts. The legacy grunt/yogi/bower toolchain is
+  retired; `build/` is hand-synced (no build step on install). See `BUILD.md`.
+- Target runtime: Node 26 LTS (engines `node >=18`). License: `BSD-3-Clause`.
+- CI runs on GitHub Actions (`.github/workflows/ci.yml`) across Node 18/20/26.
+- Active modernization: replacing the deprecated `request` dependency and migrating
+  tests to Vitest/Playwright.
 
 ## Commit message standard
 
