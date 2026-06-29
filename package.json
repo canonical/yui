@@ -18,12 +18,15 @@
     },
     "devDependencies": {
         "@playwright/test": "^1.61.1",
+        "http-server": "^14.1.1",
         "vitest": "^2.1.9"
     },
     "scripts": {
         "test": "vitest run",
         "test:node": "vitest run",
-        "test:browser": "playwright test"
+        "test:browser": "playwright test --project=browser",
+        "test:legacy": "playwright test --project=legacy",
+        "test:all": "vitest run && playwright test"
     },
     "license": "BSD-3-Clause",
     "publishConfig": {

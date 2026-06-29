@@ -18,3 +18,8 @@ node_modules
 api-js/
 /*.project
 .builds
+
+# Test artifacts
+test-results/
+playwright-report/
+coverage/
